@@ -233,7 +233,7 @@ def test_setup_creates_env_file_with_key_and_mode_600(tmp_path):
     assert code == 0
     assert env_path.read_text().splitlines() == [
         f"GOOGLE_API_KEY={FAKE_KEY}",
-        "GOOGLE_GENAI_USE_VERTEXAI=FALSE",
+        "GOOGLE_GENAI_USE_ENTERPRISE=FALSE",
     ]
     assert stat.S_IMODE(env_path.stat().st_mode) == 0o600
 
@@ -242,7 +242,7 @@ def test_setup_creates_env_file_with_key_and_mode_600(tmp_path):
 def test_setup_updates_existing_env_keeping_other_lines(tmp_path):
     env_path = tmp_path / ".env"
     env_path.write_text(
-        "MODEL=gemini-x\nGOOGLE_API_KEY=old\n# nota\nGOOGLE_GENAI_USE_VERTEXAI=TRUE\n"
+        "MODEL=gemini-x\nGOOGLE_API_KEY=old\n# nota\nGOOGLE_GENAI_USE_ENTERPRISE=TRUE\n"
     )
     env_path.chmod(0o644)
     deps, _, _ = make_deps(env_path=env_path, secrets=[FAKE_KEY])
@@ -253,7 +253,7 @@ def test_setup_updates_existing_env_keeping_other_lines(tmp_path):
         "MODEL=gemini-x",
         f"GOOGLE_API_KEY={FAKE_KEY}",
         "# nota",
-        "GOOGLE_GENAI_USE_VERTEXAI=FALSE",
+        "GOOGLE_GENAI_USE_ENTERPRISE=FALSE",
     ]
     assert stat.S_IMODE(env_path.stat().st_mode) == 0o600
 
