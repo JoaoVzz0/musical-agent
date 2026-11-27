@@ -23,7 +23,7 @@
 - CLI (`uv run musical-agent`): greeting, loop, `/new` (new session), `/exit`, `--session <id>` to resume; `--debug` prints tools, tokens and latency per turn.
 - Works non-interactively with piped stdin (one message per line, exits at EOF), so checks can be scripted: `printf 'oi\n/exit\n' | uv run musical-agent --debug`.
 - Friendly message, no stack trace, when `GOOGLE_API_KEY` is missing or the API fails (including 429 rate limit). The missing-key message shows the AI Studio link and suggests `uv run musical-agent setup`.
-- `uv run musical-agent setup`: asks for the Gemini key with hidden input (`getpass`), creates or updates `.env` (keeps other lines, sets `GOOGLE_GENAI_USE_VERTEXAI=FALSE`), file mode `600`, never prints or logs the key. The key never lives in the repo: a reviewer who received a temporary key by e-mail pastes it here.
+- `uv run musical-agent setup`: asks for the Gemini key with hidden input (`getpass`), creates or updates `.env` (keeps other lines, sets `GOOGLE_GENAI_USE_ENTERPRISE=FALSE`; `GOOGLE_GENAI_USE_VERTEXAI` is deprecated in google-genai), file mode `600`, never prints or logs the key. The key never lives in the repo: a reviewer who received a temporary key by e-mail pastes it here.
 - Tests: write the DoD rows `04.C*` first (TDD).
 
 ## DoD
