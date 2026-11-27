@@ -33,4 +33,16 @@ Short ADRs: context, decision, consequences. Assumptions about the data and the 
 - **Consequences:** zero infrastructure for the reviewer and offline tests. SQLite allows one writer at a time and the file is local to one machine, which is fine for a single CLI user but not for several instances. A real project would use `FirestoreSessionService`, `VertexAiSessionService` (Agent Engine) or Postgres on Cloud SQL; the swap is one line because the `Runner` depends on `BaseSessionService`.
 
 ## Assumptions about data and manual
-Recorded in phase 02.
+The challenge allows reasonable interpretations when information is ambiguous. Each one below states the inconsistency and the interpretation the agent follows.
+
+| # | Inconsistency or gap | Interpretation |
+|---|---|---|
+| A1 | The manual lists the store phone/WhatsApp as (67) 3341-4444 (cover and 1.2) and the WhatsApp channel as (67) 3321-4500 (section 7). | Both are official: (67) 3341-4444 is the store phone; (67) 3321-4500 is the WhatsApp support channel. The agent gives the one that matches the request and never invents others. |
+| A2 | The e-mail appears as `contato@emporiodamusica.com.br` (cover) and `contato@empóriodamusica.com.br` (1.2, with accent). | Accented domains are unusual and error-prone in e-mail clients, so the agent uses `contato@emporiodamusica.com.br`. Both forms are treated as store contact data (never as customer PII) by the output screening. |
+| A3 | The payment table says credit card "parcela mínima R$ 100,00", while 3.1 defines tiers (up to 3x: R$ 50; 4x-6x: R$ 80; 7x-12x: R$ 100). | Section 3.1 is more specific and wins. `max_installments` is the largest n that satisfies its tier; paying in 1x is always allowed. |
+| A4 | Orders 3 and 20 have `total_brl` different from the sum of item prices (3450 vs 3498; 1400 vs 1488). | `total_brl` is the source of truth (it may include discounts or price changes at purchase time). The agent never recomputes order totals. |
+| A5 | Delivered orders have no actual delivery date. | `estimated_delivery` is used as the delivery date for `delivered` orders. |
+| A6 | Exchange for defect (4.2) counts "30 days after purchase", while withdrawal (4.1) and legal warranty (8.1) count from receipt. | All after-sales windows are counted from the delivery date, the customer-friendly reading that also matches consumer law. |
+| A7 | Right of withdrawal (4.1) applies to "compras online", but the data does not say where each order was placed. | Every order in `orders.csv` has shipping, tracking or delivery data, so all are treated as online purchases. For in-store purchases the agent explains that 4.1 does not apply and points to the exchange for preference (4.3, 7 days). |
+| A8 | Manual 7.1 asks to suggest partner stores for accessories, but no partner list exists. | The agent says the store sells instruments only and that it has no partner list to recommend, instead of inventing one. |
+| A9 | Orders go up to March 2026 while the real date is later, so "now" changes every answer about order status and windows. | "Now" comes from `AGENT_NOW` when set (tests, evals, examples use fixed dates) or the system clock in `America/Campo_Grande`. |
