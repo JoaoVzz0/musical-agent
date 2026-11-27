@@ -1,0 +1,16 @@
+.git
+.env
+.env.*
+!.env.example
+.venv
+var
+challenge
+evals/.cache
+**/.adk
+**/__pycache__
+.pytest_cache
+.ruff_cache
+*.zip
+.DS_Store
+.idea
+.vscode

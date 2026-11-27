@@ -1,0 +1,39 @@
+name: musical-agent
+
+x-runtime: &runtime
+  env_file:
+    - path: .env
+      required: false
+  volumes:
+    - ./var:/app/var
+
+services:
+  web:
+    <<: *runtime
+    build:
+      context: .
+      target: app
+    image: musical-agent:app
+    command: ["adk", "web", "--host", "0.0.0.0", "--port", "8000", "src"]
+    ports:
+      - "8000:8000"
+
+  chat:
+    <<: *runtime
+    image: musical-agent:app
+    build:
+      context: .
+      target: app
+    profiles: ["cli"]
+    stdin_open: true
+    tty: true
+    command: ["musical-agent"]
+
+  tests:
+    <<: *runtime
+    build:
+      context: .
+      target: test
+    image: musical-agent:test
+    profiles: ["test"]
+    command: ["pytest"]
