@@ -21,10 +21,10 @@ Execution order and dependencies: `PLAN.md`. A wave starts when every track it d
 | W2 | 03.X Phase 03 integration | done | c2b50ae, 450f92c |
 | W3 | 04.A Agent | done | 87f136a, c3b2c0b, e259e6e, fbb5665, 5868bcd, 5e87a19, f328607, c635c90, 0956baf, fd86fee, 3e20b06, fed2809, 056fe9e, a481564, c688730 |
 | W3 | 04.M API checks | done | manual evidence in wave 3 report (M1 context + resume, M2 routing, M3 adk web + plugin) |
-| W4 | 05.B Examples script | pending | |
+| W4 | 05.B Examples script | done | 2c20e5c, 29f7ba1 |
 | W2 | 05.D4 Embeddings comparison (pulled forward from W4) | done | 1ce34b9, 7f71846, cd3f267 |
-| W4 | 05.A5 Real eval run | pending | |
-| W4 | 05.B Examples generated | pending | |
-| W4 | 05.C2 CI green | pending | |
-| W4 | 05.E Containers | pending | |
-| W5 | 06 README | pending | |
+| W4 | 05.A5 Real eval run | done | 4b2df58, afe1b95, 6288eba, b3eeb06, 2c07bff, 07c662a, d2a9e27, 69ccb23, af437ad, 4cfe8b4, 0529fe3, 33b7fbf, b46b273 |
+| W4 | 05.B Examples generated | done | 0cacc23, 2c6bc38 |
+| W4 | 05.C2 CI green | done | verified after final push |
+| W4 | 05.E Containers | done | 552db0f, 8cf4622, 246171f |
+| W5 | 06 README | done | 8be0208, 1b5492d |
