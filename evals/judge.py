@@ -9,7 +9,7 @@ from typing import Any
 
 logger = logging.getLogger(__name__)
 
-JUDGE_MODEL = "gemini-2.5-flash"
+JUDGE_MODEL = "gemini-3.5-flash"
 JUDGE_TEMPERATURE = 0.0
 JSON_MIME_TYPE = "application/json"
 CODE_FENCE = re.compile(r"^```(?:json)?\s*(.*?)\s*```$", re.DOTALL)
