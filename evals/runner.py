@@ -15,6 +15,7 @@ from pathlib import Path
 from typing import Any, Protocol
 from uuid import uuid4
 
+import httpx
 import yaml
 from google.genai.errors import APIError
 
@@ -362,6 +363,12 @@ def is_rate_limit(error: APIError) -> bool:
     return error.code in TRANSIENT_STATUS_CODES
 
 
+def is_transient(error: Exception) -> bool:
+    if isinstance(error, httpx.TransportError):
+        return True
+    return isinstance(error, APIError) and is_rate_limit(error)
+
+
 def paced(
     responder: Responder,
     min_interval_s: float = DEFAULT_TURN_INTERVAL_S,
@@ -392,8 +399,8 @@ async def _attempt_with_retry(
     for delay in (*retry_delays, None):
         try:
             return await _run_attempt(case, responder, judge)
-        except APIError as error:
-            if not is_rate_limit(error):
+        except (APIError, httpx.TransportError) as error:
+            if not is_transient(error):
                 raise
             if delay is None:
                 logger.warning("case %s still rate limited after retries", case.id)
