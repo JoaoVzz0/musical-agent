@@ -41,7 +41,6 @@ docker-compose up                 # chat in the browser: http://localhost:8000 (
 docker-compose run --rm chat      # or chat in the terminal
 docker-compose run --rm tests     # deterministic test suite (no key needed)
 ```
-`docker compose` (with a space) works too.
 
 **Getting a free key (1 minute):** open [Google AI Studio](https://aistudio.google.com/apikey) → **Create API key** → **Create API key in new project**. A new project has no billing, so it is free; over the limit the API returns 429, never a bill. If you received a temporary key by e-mail, use that one.
 
@@ -121,7 +120,7 @@ Ambiguities were resolved with documented interpretations ([full table](docs/dec
 
 ## Evaluation and gates
 
-**Results on the final prompt** (`gemini-3.5-flash-lite`, 25 real conversations): **23 / 25 passed (92%), every critical case passed (orders and red team, 3 runs out of 3 each): gate reached** (≥ 90% overall, 100% critical, 100% red team). Reports: [part 1](evals/report-final-part1.md) and [part 2](evals/report-final-part2.md); the run was split because a hung connection stalled it, which led to a 60 s timeout with retries on every model call.
+**Results on the final prompt** (`gemini-3.5-flash-lite`, 25 real conversations): **23 / 25 passed (92%), every critical case passed (orders and red team, 3 runs out of 3 each): gate reached** (≥ 90% overall, 100% critical, 100% red team). Report: [`evals/report-final.md`](evals/report-final.md). The run was split in two parts because a hung connection stalled it, which led to a 60 s timeout with retries on every model call; the consolidated report recomputes the gate over all 25 cases. Same prompt in both parts: `instruction.md` did not change, part 2 only ran after the timeout fix in `agent.py`.
 
 The 2 remaining failures are normal-severity cases, kept visible instead of tuned away:
 - `policies_withdrawal_outside_window`: in that run the agent said the return window had expired but did not mention the legal warranty on its own (it does in [example 04](examples/04-arrependimento.md)): the smaller model follows this rule inconsistently.
