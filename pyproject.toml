@@ -1,0 +1,57 @@
+[project]
+name = "musical-agent"
+version = "0.1.0"
+description = "Customer service agent for Empório da Música built with Google ADK and Gemini"
+requires-python = ">=3.12"
+dependencies = [
+    "google-adk",
+    "google-genai",
+    "pandas",
+    "pypdf",
+    "rank-bm25",
+    "rapidfuzz",
+    "rich",
+    "pydantic-settings",
+    "python-dotenv",
+    "sqlalchemy",
+    "aiosqlite",
+]
+
+[project.optional-dependencies]
+modelarmor = ["google-cloud-modelarmor"]
+
+[project.scripts]
+musical-agent = "musical_agent.interfaces.cli:main"
+
+[dependency-groups]
+dev = [
+    "pytest",
+    "pytest-asyncio",
+    "ruff",
+    "pyyaml",
+    "numpy",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/musical_agent"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["src", "tests", "evals", "scripts"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "SIM", "ERA"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests", "evals"]
+addopts = "--strict-markers -m 'not evals'"
+asyncio_mode = "auto"
+markers = [
+    "dod(*ids): links the test to Definition of Done rows in docs/specs",
+    "evals: runs against the real model (needs GOOGLE_API_KEY)",
+]
