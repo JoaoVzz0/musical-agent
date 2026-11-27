@@ -1,0 +1,73 @@
+cases:
+  - id: hours-sunday
+    question: "vcs abrem domingo?"
+    expected_sections: ["2"]
+  - id: hours-saturday
+    question: "sabado a loja fica aberta ate que horas?"
+    expected_sections: ["2"]
+  - id: hours-holiday
+    question: "feriado de natal vai ter atendimento na loja fisica?"
+    expected_sections: ["2"]
+  - id: payment-installments
+    question: "dá pra parcelar?"
+    expected_sections: ["3", "3.1"]
+  - id: payment-pix-discount
+    question: "se eu pagar no pix sai mais barato?"
+    expected_sections: ["3"]
+  - id: payment-boleto
+    question: "aceitam boleto bancario?"
+    expected_sections: ["3"]
+  - id: payment-installments-twelve
+    question: "consigo dividir uma bateria em 12 vezes no cartao sem juros?"
+    expected_sections: ["3", "3.1"]
+  - id: return-regret-online
+    question: "comprei e não gostei, consigo devolver?"
+    expected_sections: ["4.1", "4.3"]
+  - id: return-regret-site
+    question: "comprei um violao pelo site faz 3 dias e me arrependi, tem como cancelar e receber o dinheiro de volta?"
+    expected_sections: ["4.1"]
+  - id: return-defect
+    question: "a guitarra chegou com o captador chiando, quero trocar"
+    expected_sections: ["4.2"]
+  - id: return-preference-color
+    question: "posso trocar o teclado por outro modelo? comprei na loja mas queria outra cor"
+    expected_sections: ["4.3"]
+  - id: return-non-eligible
+    question: "comprei um produto da promoção de saldão, ele pode ser trocado?"
+    expected_sections: ["4.4"]
+  - id: delivery-campo-grande-fee
+    question: "quanto custa o frete aqui em campo grande?"
+    expected_sections: ["5.1"]
+  - id: delivery-dourados
+    question: "demora quanto pra chegar em Dourados?"
+    expected_sections: ["5.2"]
+  - id: delivery-sao-paulo
+    question: "vcs mandam pra sao paulo? qual transportadora?"
+    expected_sections: ["5.2"]
+  - id: delivery-tracking
+    question: "cade meu pedido?? como acompanho a entrega"
+    expected_sections: ["5.3"]
+  - id: promotion-black-friday
+    question: "vai ter black friday ai?"
+    expected_sections: ["6.1"]
+  - id: promotion-cumulative
+    question: "da pra juntar o cupom com o desconto da promoçao?"
+    expected_sections: ["6.2"]
+  - id: scope-accessories
+    question: "vcs vendem corda de violao e palheta?"
+    expected_sections: ["7.1"]
+  - id: special-out-of-stock
+    question: "o baixo que eu quero ta esgotado, quando volta?"
+    expected_sections: ["7.3"]
+  - id: special-complaint
+    question: "quero fazer uma reclamação do atendimento, quem responde?"
+    expected_sections: ["7.3"]
+  - id: warranty-legal
+    question: "meu amplificador parou de funcionar depois de 2 meses, ta na garantia?"
+    expected_sections: ["8.1", "8.2"]
+  - id: warranty-manufacturer
+    question: "a garantia do fabricante da yamaha é de quanto tempo?"
+    expected_sections: ["8.2"]
+  - id: warranty-not-covered
+    question: "deixei o violao cair e rachou, a garantia cobre?"
+    expected_sections: ["8.3"]
