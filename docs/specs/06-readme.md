@@ -13,10 +13,10 @@
      | Option | Pros | Cons |
      |---|---|---|
      | Full manual in the prompt | never misses context; manual is only 8 pages (~3-4k tokens) | does not scale; tokens every turn; hides *when* the agent decides to consult policies, which the challenge evaluates |
-     | BM25 (chosen) | simple, no network, deterministic, testable | weak on paraphrases without stemming/synonyms |
-     | Embeddings | handles paraphrases and informal language | external dependency, less predictable on exact terms (PIX, SEDEX) |
+     | BM25 (fallback) | simple, no network, deterministic, testable | weak on paraphrases that share no words with the manual |
+     | Embeddings (chosen) | handles paraphrases and informal language | external dependency, less predictable on exact terms (PIX, SEDEX) |
      | Hybrid (BM25 + embeddings, RRF) | best of both | extra complexity for a tiny corpus |
-   - Why BM25 is enough here: ~25 chunks in 10 sections with distinct vocabulary; the model rewrites the customer question before calling `search_policies`; top-2 over 25 chunks gives high recall.
+   - The plan started with BM25 as the simplest option (~25 chunks, distinct vocabulary per section, the model rewrites the question). The measurement contradicted it on raw customer paraphrases, so the decision rule switched production to embeddings with BM25 as offline fallback; the hybrid was measured and rejected.
    - **Decided by measurement**: retrieval eval results table (recall@2, MRR for BM25, embeddings, hybrid), the decision rule and the outcome.
    - No vector database: ~25 vectors fit in a `numpy` matrix; Chroma/FAISS/Vertex Vector Search would add infrastructure with no gain. Next step if the policy corpus grows (FAQ, product manuals).
    - **No custom REST API** (ADR-004). Always framed as a **scope decision for this prototype**, not as the right architecture for production:
@@ -34,7 +34,7 @@
 5. **Cost:** everything runs on the Gemini free tier at zero cost (no billing = no charges, only 429 on limits); note that free-tier content may be used by Google to improve products (data here is fictional); reference paid prices for a full eval run (cents of a dollar).
 6. **Data handling and assumptions** (summary + link to `docs/decisions.md`), including the online-purchase, delivery-date and partner-store assumptions.
 7. **Evaluation and gates:** link to the latest successful manual `evals` run on GitHub Actions if one exists (found through the public API: `actions/runs?event=workflow_dispatch&status=success`); DoD traceability (every acceptance criterion maps to a test), unit tests, agent eval layers, coverage, red team, retrieval eval, CI gates and current results.
-8. **Known limitations and next steps:** hybrid retrieval in production if the corpus grows; API layer for scale (auth, rate limiting, stateless workers) with WhatsApp channel; tools moved to MCP servers per system of record (consumed via ADK `McpToolset`); human handoff queue integrated with the team's tools; Langfuse/OpenTelemetry tracing; production session store (Firestore, Agent Engine sessions or Postgres); Model Armor enabled by default in a GCP deployment.
+8. **Known limitations and next steps:** re-run the retrieval eval (and reconsider hybrid or a reranker) if the corpus grows; API layer for scale (auth, rate limiting, stateless workers) with WhatsApp channel; tools moved to MCP servers per system of record (consumed via ADK `McpToolset`); human handoff queue integrated with the team's tools; Langfuse/OpenTelemetry tracing; production session store (Firestore, Agent Engine sessions or Postgres); Model Armor enabled by default in a GCP deployment.
 9. **AI coding assistants:** Claude Code with phased specs, DoD-driven TDD (each DoD row -> marked test, red before green, `test:` commit before `feat:`, enforced by `dod_check.py`), path-scoped rules, an implementation skill with parallel subagents per track, human review before each commit; how decisions (e.g. RAG strategy, no API) were discussed and challenged with the assistant.
 
 ## DoD
