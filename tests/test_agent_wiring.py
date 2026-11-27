@@ -5,7 +5,6 @@ from types import SimpleNamespace
 
 import pytest
 from google.adk.models import BaseLlm, LlmRequest, LlmResponse
-from google.adk.models.llm_response import LlmCapabilities
 from google.adk.sessions import DatabaseSessionService, InMemorySessionService
 from google.genai import types as genai_types
 
@@ -36,10 +35,6 @@ class ScriptedLlm(BaseLlm):
     model: str = "scripted"
     script: list[LlmResponse] = []
     requests: list[LlmRequest] = []
-
-    @property
-    def capabilities(self) -> LlmCapabilities:
-        return LlmCapabilities(output_schema_and_tools=True)
 
     async def generate_content_async(self, llm_request: LlmRequest, stream: bool = False):
         self.requests.append(llm_request)
