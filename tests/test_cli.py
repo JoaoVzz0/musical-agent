@@ -12,7 +12,7 @@ from pydantic import SecretStr
 from rich.console import Console
 
 from musical_agent.config import Settings
-from musical_agent.interfaces.cli import CliDeps, main, write_api_key
+from musical_agent.interfaces.cli import CliDeps, configure_logging, main, write_api_key
 from musical_agent.types import AgentReply, ToolCallRecord
 
 FAKE_KEY = "AIzaFAKE-secret-key-123"
@@ -299,3 +299,19 @@ def test_write_api_key_strips_surrounding_whitespace(tmp_path):
     write_api_key(env_path, f"  {FAKE_KEY}\n")
 
     assert env_path.read_text().splitlines()[0] == f"GOOGLE_API_KEY={FAKE_KEY}"
+
+
+@pytest.mark.dod("04.C3")
+def test_library_errors_go_to_log_file_not_to_the_terminal(tmp_path, capsys):
+    log_path = tmp_path / "musical-agent.log"
+    configure_logging(log_path)
+
+    try:
+        raise RuntimeError("node failed")
+    except RuntimeError:
+        logging.getLogger("google_adk.workflow").exception("Node execution failed")
+
+    captured = capsys.readouterr()
+    assert "Traceback" not in captured.err + captured.out
+    assert "Node execution failed" in log_path.read_text()
+    logging.getLogger().handlers.clear()
