@@ -1,17 +1,22 @@
 from __future__ import annotations
 
-import hashlib
-import json
 import logging
 import os
-from collections.abc import Callable, Sequence
+from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Protocol
 
-import numpy as np
 import yaml
 
+from musical_agent.data.embeddings import (
+    DOCUMENT_TASK,
+    EMBEDDING_MODEL,
+    QUERY_TASK,
+    Embedder,
+    EmbeddingIndex,
+    gemini_embedder,
+)
 from musical_agent.data.policies import PolicyChunk, PolicyIndex, load_policy_index
 
 logger = logging.getLogger(__name__)
@@ -20,9 +25,6 @@ EVALS_DIR = Path(__file__).resolve().parent
 CASES_PATH = EVALS_DIR / "retrieval_cases.yaml"
 REPORT_PATH = EVALS_DIR / "retrieval_report.md"
 CACHE_DIR = EVALS_DIR / ".cache"
-EMBEDDING_MODEL = "gemini-embedding-001"
-DOCUMENT_TASK = "RETRIEVAL_DOCUMENT"
-QUERY_TASK = "RETRIEVAL_QUERY"
 API_KEY_ENV = "GOOGLE_API_KEY"
 DEFAULT_K = 2
 RRF_K_CONST = 60
@@ -32,8 +34,6 @@ PERCENT = 100
 POINTS_PRECISION = 6
 MISS_PREVIEW = 3
 STRATEGIES = ("bm25", "embeddings", "hybrid")
-
-Embedder = Callable[[list[str]], list[list[float]]]
 
 
 @dataclass(frozen=True)
@@ -142,43 +142,9 @@ class Bm25Retriever:
         return [passage["section"] for passage in self._index.search(question, k=self._size)]
 
 
-def _chunk_text(chunk: PolicyChunk) -> str:
-    return f"{chunk.title}\n{chunk.text}"
-
-
-def _cache_key(chunks: Sequence[PolicyChunk], model: str) -> str:
-    digest = hashlib.sha256(model.encode("utf-8"))
-    for chunk in chunks:
-        digest.update(f"\x00{chunk.section}\x00{_chunk_text(chunk)}".encode())
-    return digest.hexdigest()
-
-
-def gemini_embedder(task_type: str, model: str = EMBEDDING_MODEL) -> Embedder:
-    """Build an embed function backed by one long-lived google-genai client.
-
-    The client must outlive every call: a client created inline is garbage-collected and
-    closes its HTTP connection while the request is still in flight.
-    """
-    from google import genai
-    from google.genai import types
-
-    client = genai.Client()
-    config = types.EmbedContentConfig(task_type=task_type)
-
-    def embed(texts: list[str]) -> list[list[float]]:
-        response = client.models.embed_content(model=model, contents=texts, config=config)
-        return [list(embedding.values or []) for embedding in response.embeddings or []]
-
-    return embed
-
-
-def _normalize(vectors: list[list[float]]) -> np.ndarray:
-    matrix = np.asarray(vectors, dtype=float)
-    norms = np.linalg.norm(matrix, axis=1, keepdims=True)
-    return matrix / np.where(norms == 0, 1, norms)
-
-
 class EmbeddingRetriever:
+    """Rank chunks with the production embedding index, so the eval measures shipped code."""
+
     def __init__(
         self,
         chunks: Sequence[PolicyChunk],
@@ -187,29 +153,16 @@ class EmbeddingRetriever:
         model: str = EMBEDDING_MODEL,
         embed_query: Embedder | None = None,
     ) -> None:
-        self._sections = [chunk.section for chunk in chunks]
-        self._embed_query = embed_query or embed or gemini_embedder(QUERY_TASK, model)
-        embed_documents = embed or gemini_embedder(DOCUMENT_TASK, model)
-        cache_path = cache_dir / f"{_cache_key(chunks, model)}.json"
-        self._matrix = _normalize(self._load_or_embed(chunks, embed_documents, cache_path))
-
-    @staticmethod
-    def _load_or_embed(
-        chunks: Sequence[PolicyChunk], embed: Embedder, cache_path: Path
-    ) -> list[list[float]]:
-        if cache_path.exists():
-            return json.loads(cache_path.read_text(encoding="utf-8"))
-        vectors = embed([_chunk_text(chunk) for chunk in chunks])
-        cache_path.parent.mkdir(parents=True, exist_ok=True)
-        cache_path.write_text(json.dumps(vectors), encoding="utf-8")
-        logger.info("Cached %d chunk embeddings at %s", len(vectors), cache_path)
-        return vectors
+        self._index = EmbeddingIndex(
+            chunks,
+            embed_documents=embed or gemini_embedder(DOCUMENT_TASK, model),
+            embed_query=embed_query or embed or gemini_embedder(QUERY_TASK, model),
+            cache_dir=cache_dir,
+            model=model,
+        )
 
     def rank(self, question: str) -> list[str]:
-        query = _normalize(self._embed_query([question]))[0]
-        similarities = self._matrix @ query
-        order = np.argsort(-similarities, kind="stable")
-        return [self._sections[position] for position in order]
+        return self._index.rank_sections(question)
 
 
 class HybridRetriever:
