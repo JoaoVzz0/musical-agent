@@ -1,0 +1,32 @@
+{
+  "includeCoAuthoredBy": false,
+  "permissions": {
+    "allow": [
+      "Bash(uv:*)",
+      "Bash(uvx:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git log:*)",
+      "Bash(git show:*)",
+      "Bash(git rev-parse:*)",
+      "Bash(git check-ignore:*)",
+      "Bash(git ls-files:*)",
+      "Bash(git clone:*)",
+      "Bash(git remote get-url:*)",
+      "Bash(git push origin main)",
+      "Bash(ls:*)",
+      "Bash(mkdir:*)",
+      "Bash(cp:*)",
+      "Bash(curl -s http://127.0.0.1:*)",
+      "Bash(curl -s https://api.github.com/repos/*)"
+    ],
+    "deny": [
+      "Bash(git push --force:*)",
+      "Bash(git push -f:*)",
+      "Bash(git commit --amend:*)",
+      "Read(./.env)"
+    ]
+  }
+}

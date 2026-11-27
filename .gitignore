@@ -1,0 +1,56 @@
+# --- Secrets and credentials ---
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*credentials*.json
+*service-account*.json
+*service_account*.json
+client_secret*.json
+token.json
+
+# --- Local kit notes (not part of the deliverable) ---
+HOW_TO_USE.md
+
+# --- Raw challenge files (copied to data/ with simple names) ---
+challenge/
+*.zip
+
+# --- Runtime data (sessions, complaints, caches) ---
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+var/
+.adk/
+evals/.cache/
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+build/
+dist/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# --- Logs ---
+*.log
+logs/
+
+# --- Editors and OS ---
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# --- Claude Code (personal settings only; shared rules, skills and settings.json are committed) ---
+.claude/settings.local.json
