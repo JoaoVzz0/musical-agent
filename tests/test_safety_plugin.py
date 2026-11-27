@@ -246,12 +246,30 @@ async def test_model_armor_block_on_output_returns_canned_reply():
 
 
 @pytest.mark.dod("04.B4")
-def test_model_armor_no_match_passes():
+def test_model_armor_no_match_passes_legitimate_message():
+    screener = ModelArmorScreener(TEMPLATE, client=FakeModelArmorClient("NO_MATCH_FOUND"))
+
+    result = screener.screen_input(LEGITIMATE_MESSAGES[0])
+
+    assert result == ScreeningResult(blocked=False)
+
+
+@pytest.mark.dod("04.B4")
+def test_local_screening_still_blocks_input_when_model_armor_allows():
     screener = ModelArmorScreener(TEMPLATE, client=FakeModelArmorClient("NO_MATCH_FOUND"))
 
     result = screener.screen_input(ATTACK_MESSAGES[0])
 
-    assert result == ScreeningResult(blocked=False)
+    assert result.blocked
+
+
+@pytest.mark.dod("04.B4")
+def test_local_screening_still_blocks_customer_pii_when_model_armor_allows():
+    screener = ModelArmorScreener(TEMPLATE, client=FakeModelArmorClient("NO_MATCH_FOUND"))
+
+    result = screener.screen_output("O telefone do cliente é (67) 99812-3456.")
+
+    assert result.blocked
 
 
 @pytest.mark.dod("04.B4")
