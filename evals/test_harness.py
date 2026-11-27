@@ -7,7 +7,7 @@ from dataclasses import replace
 from pathlib import Path
 
 import pytest
-from google.genai.errors import ClientError
+from google.genai.errors import ClientError, ServerError
 
 from evals.judge import Judge, Verdict
 from evals.runner import (
@@ -20,6 +20,7 @@ from evals.runner import (
     extract_brl_values,
     gate_passed,
     load_cases,
+    paced,
     run_case,
     run_suite,
     validate_cases,
@@ -28,6 +29,7 @@ from evals.runner import (
 from musical_agent.types import AgentReply, ToolCallRecord
 
 PINNED_NOW = "2026-02-20T10:00:00-04:00"
+OVERLOADED_PAYLOAD = {"error": {"code": 503, "message": "high demand", "status": "UNAVAILABLE"}}
 RATE_LIMIT_PAYLOAD = {"error": {"code": 429, "message": "quota", "status": "RESOURCE_EXHAUSTED"}}
 PASSING_JUDGE_OUTPUT = '{"passed": true, "reason": "ok"}'
 FAILING_JUDGE_OUTPUT = '{"passed": false, "reason": "tom ríspido"}'
@@ -487,3 +489,47 @@ def test_judge_receives_tool_outputs_as_json_serializable() -> None:
     judge.evaluate([("customer", "oi")], [{"name": "x", "response": {"a": [1, 2]}}], "r")
 
     assert json.dumps({"a": [1, 2]}) in captured[0]
+
+
+@pytest.mark.dod("05.A4")
+async def test_overloaded_model_503_is_retried_like_a_rate_limit() -> None:
+    calls = 0
+
+    async def overloaded_once(session_id: str, message: str) -> AgentReply:
+        nonlocal calls
+        calls += 1
+        if calls == 1:
+            raise ServerError(503, OVERLOADED_PAYLOAD)
+        return AgentReply("ok", [], [], 10, 100, False)
+
+    async def no_sleep(_seconds: float) -> None:
+        return None
+
+    case = replace(make_case(), expected_tools=(), must_contain=(), must_not_contain=())
+    outcome = await run_case(
+        case, overloaded_once, passing_judge(), attempts=1, retry_delays=(1.0,), sleep=no_sleep
+    )
+
+    assert outcome.status == "passed"
+    assert calls == 2
+
+
+@pytest.mark.dod("05.A4")
+async def test_paced_responder_keeps_a_minimum_interval_between_turns() -> None:
+    now = [100.0]
+    waits: list[float] = []
+
+    async def fake_sleep(seconds: float) -> None:
+        waits.append(seconds)
+        now[0] += seconds
+
+    async def instant(session_id: str, message: str) -> AgentReply:
+        now[0] += 5.0
+        return AgentReply(message, [], [], 0, 0, False)
+
+    responder = paced(instant, min_interval_s=36.0, clock=lambda: now[0], sleep=fake_sleep)
+
+    await responder("s", "first")
+    await responder("s", "second")
+
+    assert waits == [31.0]
