@@ -154,13 +154,19 @@ def _cache_key(chunks: Sequence[PolicyChunk], model: str) -> str:
 
 
 def gemini_embedder(task_type: str, model: str = EMBEDDING_MODEL) -> Embedder:
-    def embed(texts: list[str]) -> list[list[float]]:
-        from google import genai
-        from google.genai import types
+    """Build an embed function backed by one long-lived google-genai client.
 
-        response = genai.Client().models.embed_content(
-            model=model, contents=texts, config=types.EmbedContentConfig(task_type=task_type)
-        )
+    The client must outlive every call: a client created inline is garbage-collected and
+    closes its HTTP connection while the request is still in flight.
+    """
+    from google import genai
+    from google.genai import types
+
+    client = genai.Client()
+    config = types.EmbedContentConfig(task_type=task_type)
+
+    def embed(texts: list[str]) -> list[list[float]]:
+        response = client.models.embed_content(model=model, contents=texts, config=config)
         return [list(embedding.values or []) for embedding in response.embeddings or []]
 
     return embed
