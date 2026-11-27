@@ -10,6 +10,8 @@ from typing import Any
 logger = logging.getLogger(__name__)
 
 JUDGE_MODEL = "gemini-3.1-flash-lite"
+JUDGE_TIMEOUT_MS = 60_000
+JUDGE_RETRY_ATTEMPTS = 3
 JUDGE_TEMPERATURE = 0.0
 JSON_MIME_TYPE = "application/json"
 CODE_FENCE = re.compile(r"^```(?:json)?\s*(.*?)\s*```$", re.DOTALL)
@@ -91,7 +93,12 @@ def default_generate(model: str = JUDGE_MODEL) -> Generate:
     from google import genai
     from google.genai import types
 
-    client = genai.Client()
+    client = genai.Client(
+        http_options=types.HttpOptions(
+            timeout=JUDGE_TIMEOUT_MS,
+            retry_options=types.HttpRetryOptions(attempts=JUDGE_RETRY_ATTEMPTS),
+        )
+    )
     config = types.GenerateContentConfig(
         temperature=JUDGE_TEMPERATURE, response_mime_type=JSON_MIME_TYPE
     )
