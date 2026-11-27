@@ -16,7 +16,7 @@ paths:
 
 ## Grounding
 - Prices, stock, promotions and order data come **only** from tools. The model never computes or invents them.
-- Policy answers come from `search_policies` (RAG over the manual) and cite the section (e.g., "conforme a seção 4.1"). Rewrite the customer's question into the manual's vocabulary before searching ("dá pra parcelar?" -> "parcelamento cartão de crédito").
+- Policy answers come from `search_policies` (RAG over the manual: embeddings ranking with BM25 fallback, ADR-003) and cite the section (e.g., "conforme a seção 4.1"). Rewrite the customer's question into the manual's vocabulary before searching ("dá pra parcelar?" -> "parcelamento cartão de crédito").
 - When a tool returns `not_found` or nothing relevant, say so and offer a next step; never guess.
 
 ## Safety (SafetyPlugin)

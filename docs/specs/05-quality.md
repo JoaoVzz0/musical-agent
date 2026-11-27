@@ -41,7 +41,8 @@ Each track writes the tests for its DoD `test` rows (`05.<track>*`) first. Eval 
   3. hybrid (BM25 + embeddings fused with Reciprocal Rank Fusion).
 - Metrics: recall@2 and MRR per strategy; write `evals/retrieval_report.md` with the table and the misses.
 - Decision rule (recorded in ADR-003 and README): keep BM25 unless embeddings or hybrid improve recall@2 by **>= 10 points** or BM25 recall@2 is **< 90%**. If the rule triggers, the switch is a separate change with its own ADR update, not part of this track.
-- `test_retrieval.py`: BM25-only part runs without network (deterministic gate: recall@2 >= 90%); embeddings part marked `evals`.
+- `test_retrieval.py`: offline tests for metrics, cases and retrievers (fake embedder); the real comparison and the gate on the chosen retriever are marked `evals`. BM25 has an offline regression floor (measured baseline 79.2%) because it is the fallback when embeddings are unavailable.
+- **Outcome (measured in W2):** BM25 79.2% / MRR 0.769, embeddings 91.7% / 0.899, hybrid 83.3% / 0.792 -> rule triggered, production switched to embeddings with BM25 fallback (ADR-003, spec 03 rows 03.C2-03.C3).
 
 ## DoD
 | ID | Criterion | Verified by |
@@ -58,7 +59,7 @@ Each track writes the tests for its DoD `test` rows (`05.<track>*`) first. Eval 
 | 05.C2 | CI green on GitHub | command: GitHub API `actions/runs` for the pushed head shows `conclusion: success`; run link in summary |
 | 05.D1 | `retrieval_cases.yaml` schema-valid, 15+ cases, covers sections 2-8 | test |
 | 05.D2 | `recall_at_k`, `mrr` and `rrf_fuse` correct on toy rankings | test |
-| 05.D3 | BM25 recall@2 >= 90% offline | test |
+| 05.D3 | Chosen production retriever (embeddings, decided by the rule) recall@2 >= 90% on the retrieval cases with the real API; BM25 reported as baseline and offline fallback | test (`evals` marker) |
 | 05.D4 | `evals/retrieval_report.md` produced; ADR-003 updated with the decision rule outcome | command + manual |
 
 ## Commits

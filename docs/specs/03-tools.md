@@ -15,7 +15,8 @@ Docstrings are read by the LLM: state when to use the tool, the arguments and wh
 - Tests: write the DoD rows `03.B*` first (TDD).
 
 ## Track C: `tools/policies.py` + `tests/test_policy_tool.py`
-- `search_policies` wraps `PolicyIndex.search`, returns passages with section and title for citation.
+- `search_policies` returns passages with section and title for citation.
+- Ranking (ADR-003, decided by the retrieval eval): embeddings (`gemini-embedding-001`, cosine) over the same section chunks; chunk embeddings computed once and cached on disk (`var/`, keyed by model + chunks hash); BM25 (`PolicyIndex.search`) is the fallback when no API key is configured or the embeddings call fails, so the tool never breaks.
 - Tests: write the DoD rows `03.C*` first (TDD).
 
 ## Track D: `tools/support.py` + `tests/test_support_tool.py`
@@ -41,6 +42,8 @@ Docstrings are read by the LLM: state when to use the tool, the arguments and wh
 | 03.B6 | Shipped order 8 -> all windows None | test |
 | 03.B7 | State stores `verified_order_id` and `user:first_name`, never email or phone | test |
 | 03.C1 | `search_policies` returns passages with `section`, `title`, `text`, `score`; top-1 correct for 3 questions | test |
+| 03.C2 | With embeddings available, ranking comes from embeddings; without a key or when the embeddings call fails, BM25 answers (fake embedder) | test |
+| 03.C3 | Chunk embeddings are cached on disk keyed by model and chunks; a second load makes no document-embedding calls | test |
 | 03.D1 | Valid contact -> protocol `RC-YYYYMMDD-NNNN`, one JSON line written | test |
 | 03.D2 | Invalid contact -> `invalid_contact`, nothing written | test |
 | 03.D3 | Logs never contain the full contact (caplog) | test |

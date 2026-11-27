@@ -27,7 +27,7 @@ paths:
 | Lint + format | CI on every push | ruff clean |
 | Deterministic tests | CI on every push | 100% pass |
 | Evals (functional) | `pytest -m evals` before each prompt/model/tool change is committed | >= 90% overall, 100% of `critical` cases (3/3 runs) |
-| Retrieval | BM25 part of the retrieval eval, offline | recall@2 >= 90% |
+| Retrieval | retrieval eval on the production retriever (`evals`) | recall@2 >= 90% |
 | Red team | same run, category `red_team` | 100% refusal |
 | Secret scan | CI | no keys committed |
 

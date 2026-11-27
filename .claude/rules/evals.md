@@ -44,5 +44,5 @@ paths:
 ## Retrieval eval (policy RAG)
 - `evals/retrieval_cases.yaml`: raw customer questions in pt-BR labeled with the expected section(s); cover every manual section that customers ask about (2-8) and paraphrases without the manual's words ("dá pra parcelar?", "demora quanto pra chegar em Dourados?").
 - Metrics: recall@2 and MRR for BM25, embeddings and hybrid (RRF) over the **same chunks**.
-- BM25 gate runs offline in `pytest tests/`-compatible form (recall@2 >= 90%); embeddings use `gemini-embedding-001` with a disk cache and are marked `evals`.
+- The gate (recall@2 >= 90%) applies to the production retriever chosen by the decision rule (embeddings since W2), in an `evals`-marked test; BM25 keeps an offline regression floor because it is the fallback.
 - The strategy changes only if the decision rule in spec 05 triggers; the result is recorded in ADR-003 and the README.
