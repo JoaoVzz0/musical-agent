@@ -178,15 +178,16 @@ def is_match_found(response: Any) -> bool:
 
 
 class ModelArmorScreener:
-    """Screener backed by Google Cloud Model Armor, with a local fallback.
+    """Screener backed by Google Cloud Model Armor, layered on top of local screening.
 
     Args:
         template: Full Model Armor template name
             (`projects/<p>/locations/<l>/templates/<t>`).
         client: Optional pre-built client exposing `sanitize_user_prompt` and
             `sanitize_model_response`; built lazily from `google-cloud-modelarmor` if omitted.
-        fallback: Screener used when the library is missing or the API call fails;
-            defaults to `LocalScreener()`.
+        fallback: Local screener applied whenever Model Armor allows the text (defense in
+            depth: Model Armor adds checks, never removes them) and alone when the library is
+            missing or the API call fails; defaults to `LocalScreener()`.
     """
 
     def __init__(
@@ -218,7 +219,7 @@ class ModelArmorScreener:
             return fallback(text)
         if is_match_found(response):
             return ScreeningResult(blocked=True, reason=MODEL_ARMOR_REASON)
-        return ALLOWED
+        return fallback(text)
 
     def _get_client(self) -> Any:
         if self._client is None:
