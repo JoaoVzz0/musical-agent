@@ -4,6 +4,7 @@ import argparse
 import asyncio
 import getpass
 import importlib
+import logging
 import os
 import sys
 import uuid
@@ -33,6 +34,8 @@ EXIT_COMMAND = "/exit"
 USER_PROMPT = "Você: "
 SETUP_COMMAND = "setup"
 API_KEY_URL = "https://aistudio.google.com/apikey"
+LOG_FILE_NAME = "musical-agent.log"
+LOG_FORMAT = "%(asctime)s %(levelname)s %(name)s: %(message)s"
 
 GREETING = (
     "Olá! Eu sou a Lia, assistente virtual do Empório da Música. "
@@ -95,9 +98,22 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def configure_logging(log_path: Path) -> None:
+    """Send every log record, including library stack traces, to a file.
+
+    The terminal is the customer's chat window: only Lia's replies belong there.
+    """
+    log_path.parent.mkdir(parents=True, exist_ok=True)
+    handler = logging.FileHandler(log_path, encoding="utf-8")
+    logging.basicConfig(level=logging.INFO, format=LOG_FORMAT, handlers=[handler], force=True)
+    logging.captureWarnings(True)
+
+
 def main(argv: list[str] | None = None, deps: CliDeps | None = None) -> int:
     args = build_parser().parse_args(argv)
-    deps = deps or CliDeps()
+    if deps is None:
+        deps = CliDeps()
+        configure_logging(deps.settings_factory().support_dir / LOG_FILE_NAME)
     if args.command == SETUP_COMMAND:
         return run_setup(deps)
     return run_chat(deps, session_id=args.session, debug=args.debug)
