@@ -411,14 +411,14 @@ def test_report_lists_rate_limited_separately_from_failures(tmp_path: Path) -> N
         result("slow_case", "policies", "normal", "rate_limited"),
     ]
 
-    write_report(results, path, model="gemini-2.5-flash", prompt_version="abc1234")
+    write_report(results, path, model="gemini-3.5-flash", prompt_version="abc1234")
 
     report = path.read_text(encoding="utf-8")
     failed_section = report.split("## Failed cases")[1].split("## Rate limited")[0]
     assert "bad_case" in failed_section
     assert "slow_case" not in failed_section
     assert "slow_case" in report.split("## Rate limited")[1]
-    assert "gemini-2.5-flash" in report
+    assert "gemini-3.5-flash" in report
     assert "abc1234" in report
     assert "Judge spot-check" in report
 

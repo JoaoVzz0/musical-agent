@@ -66,14 +66,14 @@ def scripted_runner(script, session_service=None, settings=None):
 
 @pytest.mark.dod("04.A1")
 def test_root_agent_registers_the_five_tools():
-    agent = build_agent("gemini-2.5-flash")
+    agent = build_agent("gemini-3.5-flash")
 
     assert {tool.__name__ for tool in agent.tools} == EXPECTED_TOOLS
 
 
 @pytest.mark.dod("04.A1")
 def test_app_registers_the_safety_plugin():
-    app = build_app(build_agent("gemini-2.5-flash"), Settings(_env_file=None))
+    app = build_app(build_agent("gemini-3.5-flash"), Settings(_env_file=None))
 
     assert any(isinstance(plugin, SafetyPlugin) for plugin in app.plugins)
     assert app.name == "musical_agent"
