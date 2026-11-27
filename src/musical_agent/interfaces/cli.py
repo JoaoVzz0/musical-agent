@@ -21,8 +21,8 @@ from musical_agent.types import AgentReply
 
 AGENT_MODULE = "musical_agent.agent.agent"
 API_KEY_VARIABLE = "GOOGLE_API_KEY"
-VERTEX_VARIABLE = "GOOGLE_GENAI_USE_VERTEXAI"
-VERTEX_DISABLED = "FALSE"
+BACKEND_VARIABLE = "GOOGLE_GENAI_USE_ENTERPRISE"
+ENTERPRISE_DISABLED = "FALSE"
 ENV_FILE_MODE = 0o600
 RATE_LIMIT_STATUS = 429
 MAX_KEY_ATTEMPTS = 3
@@ -224,7 +224,7 @@ def ask_api_key(deps: CliDeps) -> str | None:
 def write_api_key(env_path: Path, key: str) -> None:
     """Set the API key and disable Vertex AI in the env file, keeping every other line."""
     existing = env_path.read_text(encoding="utf-8").splitlines() if env_path.exists() else []
-    updates = {API_KEY_VARIABLE: key.strip(), VERTEX_VARIABLE: VERTEX_DISABLED}
+    updates = {API_KEY_VARIABLE: key.strip(), BACKEND_VARIABLE: ENTERPRISE_DISABLED}
     lines = [replace_assignment(line, updates) for line in existing]
     assigned = {variable_name(line) for line in existing}
     lines.extend(f"{name}={value}" for name, value in updates.items() if name not in assigned)
