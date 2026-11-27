@@ -1,0 +1,83 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Lint, format and tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - name: Install dependencies
+        run: uv sync --locked
+      - name: Lint
+        run: uv run ruff check .
+      - name: Format
+        run: uv run ruff format --check .
+      - name: Deterministic tests
+        run: uv run pytest
+      - name: Definition of Done check
+        run: uv run python scripts/dod_check.py --done
+      - name: No code comments
+        run: uv run python scripts/check_comments.py
+
+  secret-scan:
+    name: Secret scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  evals:
+    name: Evals (real model)
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    env:
+      GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+    steps:
+      - name: Check GOOGLE_API_KEY secret
+        id: secret
+        run: |
+          if [ -z "$GOOGLE_API_KEY" ]; then
+            echo "::notice::GOOGLE_API_KEY secret not set, evals skipped"
+            echo "available=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/checkout@v4
+        if: steps.secret.outputs.available == 'true'
+      - uses: astral-sh/setup-uv@v6
+        if: steps.secret.outputs.available == 'true'
+      - name: Install dependencies
+        if: steps.secret.outputs.available == 'true'
+        run: uv sync --locked
+      - name: Functional evals
+        if: steps.secret.outputs.available == 'true'
+        run: uv run pytest -m evals
+      - name: Retrieval eval
+        if: steps.secret.outputs.available == 'true'
+        run: uv run python evals/retrieval_eval.py
+      - name: Upload eval reports
+        if: steps.secret.outputs.available == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: eval-reports
+          path: |
+            evals/report.md
+            evals/retrieval_report.md
+          if-no-files-found: warn
