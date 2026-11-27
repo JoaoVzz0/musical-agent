@@ -113,10 +113,11 @@ def _remember_verification(
 def _lookup(order_number: int, email_or_phone: str) -> dict[str, Any]:
     dataset = load_dataset()
     order = _first_row(dataset.orders, "order_id", int(order_number))
-    if order is None:
-        logger.info("Order %s not found", order_number)
-        return {"status": "not_found"}
-    customer = _first_row(dataset.customers, "customer_id", int(order["customer_id"]))
+    customer = (
+        None
+        if order is None
+        else _first_row(dataset.customers, "customer_id", int(order["customer_id"]))
+    )
     if customer is None or not _contact_matches(customer, email_or_phone):
         logger.info("Verification failed for order %s", order_number)
         return {"status": "verification_failed"}
@@ -147,9 +148,10 @@ def get_order_status(
         note (e.g. cancellation reason), after-sales fields (days_since_delivery,
         withdrawal_eligible, defect_exchange_eligible, legal_warranty_until; all None when
         the order was not delivered) and customer_first_name.
-        {"status": "verification_failed"} when the e-mail or phone does not match the order
-        (do not reveal anything about it); {"status": "not_found"} when the order does not
-        exist; {"status": "error", "message": ...} when the lookup failed.
+        {"status": "verification_failed"} when the order does not exist or the e-mail or
+        phone does not match it (the same answer on purpose, so order numbers cannot be
+        probed; ask the customer to check both); {"status": "error", "message": ...} when the
+        lookup failed.
     """
     try:
         result = _lookup(order_number, email_or_phone)
