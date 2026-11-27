@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 import yaml
@@ -303,3 +304,30 @@ def test_real_comparison_writes_report() -> None:
 
     assert results["embeddings"] is not None
     assert REPORT_PATH.exists()
+
+
+def test_gemini_embedder_keeps_one_client_alive_across_calls(monkeypatch):
+    from google import genai
+
+    created = []
+
+    class FakeModels:
+        def embed_content(self, model, contents, config):
+            return SimpleNamespace(
+                embeddings=[SimpleNamespace(values=[1.0, 0.0]) for _ in contents]
+            )
+
+    class FakeClient:
+        def __init__(self):
+            created.append(self)
+            self.models = FakeModels()
+
+    monkeypatch.setattr(genai, "Client", FakeClient)
+    embed = gemini_embedder("RETRIEVAL_QUERY")
+
+    first = embed(["a"])
+    second = embed(["b", "c"])
+
+    assert len(created) == 1
+    assert first == [[1.0, 0.0]]
+    assert len(second) == 2
