@@ -110,7 +110,7 @@ CONVERSATIONS: tuple[ExampleConversation, ...] = (
         turns=(
             "Me arrependi da minha compra, posso devolver meu pedido?",
             "É o pedido 7, e-mail leticia.rocha@jmail.com",
-            "e se o violão tiver algum defeito, ainda tenho alguma garantia?",
+            "e se o ukulele tiver algum defeito, ainda tenho alguma garantia?",
         ),
     ),
     ExampleConversation(
