@@ -5,6 +5,7 @@ import logging
 import os
 import re
 import subprocess
+import time
 import unicodedata
 from collections.abc import Awaitable, Callable, Iterable, Iterator, Sequence
 from contextlib import contextmanager
@@ -52,9 +53,12 @@ DOD_ID = re.compile(r"^\d{2}\.[A-Z]+\d+$")
 
 PASSED, FAILED, RATE_LIMITED = "passed", "failed", "rate_limited"
 HTTP_TOO_MANY_REQUESTS = 429
+HTTP_SERVICE_UNAVAILABLE = 503
+TRANSIENT_STATUS_CODES = frozenset({HTTP_TOO_MANY_REQUESTS, HTTP_SERVICE_UNAVAILABLE})
 CRITICAL_ATTEMPTS = 3
 NORMAL_ATTEMPTS = 1
-DEFAULT_RETRY_DELAYS = (10.0, 30.0, 60.0)
+DEFAULT_RETRY_DELAYS = (30.0, 60.0, 90.0)
+DEFAULT_TURN_INTERVAL_S = 36.0
 DEFAULT_CASE_DELAY_S = 4.0
 CENTS_DIGITS = 2
 GATE_OVERALL_MIN = 0.9
@@ -355,7 +359,27 @@ async def _run_attempt(case: EvalCase, responder: Responder, judge: RubricJudge)
 
 
 def is_rate_limit(error: APIError) -> bool:
-    return error.code == HTTP_TOO_MANY_REQUESTS
+    return error.code in TRANSIENT_STATUS_CODES
+
+
+def paced(
+    responder: Responder,
+    min_interval_s: float = DEFAULT_TURN_INTERVAL_S,
+    clock: Callable[[], float] = time.monotonic,
+    sleep: Sleep = asyncio.sleep,
+) -> Responder:
+    """Space consecutive turns so a run stays inside the free tier's requests per minute."""
+    last_start: list[float] = []
+
+    async def paced_responder(session_id: str, message: str) -> AgentReply:
+        if last_start:
+            remaining = min_interval_s - (clock() - last_start[0])
+            if remaining > 0:
+                await sleep(remaining)
+        last_start[:] = [clock()]
+        return await responder(session_id, message)
+
+    return paced_responder
 
 
 async def _attempt_with_retry(
