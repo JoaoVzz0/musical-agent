@@ -7,7 +7,7 @@
 2. **How to run:** start with a short **"What needs a key"** table: no key needed for `uv run pytest`, CI, reading `examples/` and the eval reports; a key is needed only to chat live or re-run the evals. Each reviewer uses **their own** free key (never committed), with step-by-step instructions to create it in AI Studio in a project **without billing**; `uv run musical-agent setup` saves it to `.env` (also the path for a temporary key received by e-mail). Then: `uv sync`, `.env`, `uv run musical-agent` (`--debug`, `--session`), `adk web src`, `uv run pytest`, `uv run pytest -m evals`, `uv run python evals/retrieval_eval.py`, `uv run python scripts/generate_examples.py`.
 3. **Architecture:** mermaid diagram (CLI / `adk web` -> ADK `App` (Runner + SafetyPlugin + RunConfig limit) -> Gemini <-> 5 tools -> CSVs / BM25 policy index / complaints file; SQLite sessions).
 4. **Technical decisions and trade-offs** (each with its reason):
-   - ADK vs LangGraph vs no framework; Gemini 2.5 Flash.
+   - ADK vs LangGraph vs no framework; Gemini 3.5 Flash (and why not 2.5 or 3.8).
    - **Hybrid architecture**: function calling for data + RAG for policies, as the challenge suggests; why not a SQL agent (small data, deterministic rules, authorization in code).
    - **Policy retrieval (RAG)**, with the comparison table:
      | Option | Pros | Cons |

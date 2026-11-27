@@ -2,9 +2,10 @@
 
 Short ADRs: context, decision, consequences. Assumptions about the data and the store manual are recorded at the end of this file.
 
-## ADR-001: Google ADK with Gemini 2.5 Flash
+## ADR-001: Google ADK with Gemini 3.5 Flash
 - **Context:** the challenge asks for a Python agent that decides when to query data and when to query policies. We need function calling, conversation sessions, a hook point for guardrails and a quick way to inspect what the agent did.
-- **Decision:** Google ADK (single `Agent` inside an ADK `App`) with `gemini-2.5-flash` through the Google AI Studio free tier. The model is configurable with `MODEL`.
+- **Decision:** Google ADK (single `Agent` inside an ADK `App`) with `gemini-3.5-flash` through the Google AI Studio free tier. The model is configurable with `MODEL`.
+- **Model choice, verified with the real API (W3):** the plan started with `gemini-2.5-flash`, but the API now answers 404 "no longer available to new users" for it. Google's message recommends `gemini-3.8-flash`, which returned 503 "high demand" at test time. `gemini-3.5-flash` answered in about 1 s on the free tier and is a stable Flash release, so it is the default. Embeddings use `gemini-embedding-001`.
 - **Consequences:** function calling, session services, plugins, `RunConfig` limits and `adk web` (browser UI with event traces) come from the framework instead of custom code. Flash is fast, handles Brazilian Portuguese and tool use well, and costs nothing on the free tier; rate limits (429) are the main constraint, handled with backoff and small eval runs. Alternatives considered: LangGraph (more control over the graph, more code for a single-agent flow) and no framework (full control, but sessions, tool schemas and tracing would be rebuilt by hand).
 
 ## ADR-002: Hybrid agent, function calling for data and RAG for policies

@@ -10,7 +10,7 @@
 - `types.py` with the TypedDict contracts from spec 00.
 - `.gitignore` already exists (kit): keep it; add entries only if setup creates new local artifacts.
 - `docs/decisions.md` with:
-  - ADR-001: Google ADK + Gemini 2.5 Flash (free tier, native function calling, sessions, plugins, `adk web`).
+  - ADR-001: Google ADK + Gemini 3.5 Flash (free tier, native function calling, sessions, plugins, `adk web`).
   - ADR-002: hybrid architecture, function calling for data + RAG for policies (over a SQL agent: data is small, rules must be deterministic and authorization must live in code).
   - ADR-003: policy RAG with section chunks + BM25 (provisional; confirmed or changed by the retrieval eval in phase 05). Compares: full manual in the prompt, BM25, embeddings, hybrid.
   - ADR-004: CLI + `adk web`, no custom REST API and in-process function calling, **due to the prototype's scope**. A real project would need an API for scale (auth, rate limiting, stateless workers, channel webhooks) and tools exposed via MCP servers instead of in-process tool calling (reasons in spec 06).
