@@ -4,7 +4,7 @@ Execution order and dependencies: `PLAN.md`. A wave starts when every track it d
 
 | Wave | Track | Status | Commits |
 |---|---|---|---|
-| W0 | 01 Setup | pending | |
+| W0 | 01 Setup | done | ebaf8d5, fc39d1b, 36cdb84, 633324e, ef5fc92, 78e9554, 5405c37, c2b1131, 8e52c28, 8ebc445, 8e8df97, 09c6c25 |
 | W1 | 02.A CSV loader | pending | |
 | W1 | 02.B Manual index | pending | |
 | W1 | 02.C Domain rules | pending | |
