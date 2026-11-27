@@ -229,3 +229,13 @@ async def test_verified_name_does_not_leak_into_another_session_of_the_same_user
 
     second_session_instruction = str(model.requests[-1].config.system_instruction)
     assert "Pedro" not in second_session_instruction
+
+
+@pytest.mark.dod("04.A2")
+def test_model_calls_time_out_and_retry_instead_of_hanging():
+    agent = build_agent("gemini-3.5-flash-lite")
+
+    http_options = agent.generate_content_config.http_options
+
+    assert http_options.timeout == 60_000
+    assert http_options.retry_options.attempts == 3
