@@ -36,7 +36,7 @@ Docstrings are read by the LLM: state when to use the tool, the arguments and wh
 | 03.A7 | `last_viewed_product_id` saved in `tool_context.state` | test |
 | 03.B1 | Order 1 + `pedro.oliveira@jmail.com` -> ok with first name only; payload has no email, phone or address | test |
 | 03.B2 | Wrong email -> `verification_failed`; masked phone `(67) 98432-1098` matches | test |
-| 03.B3 | Order 99 -> `not_found`; cancelled order includes `note` | test |
+| 03.B3 | Order 99 -> `verification_failed`, the same answer as a wrong e-mail (an attacker cannot learn which order numbers exist); cancelled order includes `note` | test |
 | 03.B4 | Order 7 at 2026-02-20 -> `withdrawal_eligible` True | test |
 | 03.B5 | Order 7 at 2026-03-25 -> withdrawal False, defect exchange False, legal warranty valid | test |
 | 03.B6 | Shipped order 8 -> all windows None | test |

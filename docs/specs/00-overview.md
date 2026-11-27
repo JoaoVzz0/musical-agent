@@ -55,7 +55,7 @@ get_product_details(product: str, tool_context=None) -> dict
 # id or name (fuzzy). {"status": "ok", "product": ProductDetail, "alternatives": [ProductSummary]}
 
 get_order_status(order_number: int, email_or_phone: str, tool_context=None) -> dict
-# {"status": "ok", "order": OrderDetail} | {"status": "verification_failed"} | {"status": "not_found"}
+# {"status": "ok", "order": OrderDetail} | {"status": "verification_failed"}  (also for unknown orders: no enumeration)
 
 search_policies(question: str, k: int = 2) -> dict
 # {"status": "ok", "passages": [{"section": str, "title": str, "text": str, "score": float}]}
