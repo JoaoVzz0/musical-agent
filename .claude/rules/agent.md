@@ -39,5 +39,5 @@ paths:
 ## Cost and latency
 - **Use the framework first:** cap LLM calls per turn with ADK `RunConfig(max_llm_calls=MAX_LLM_CALLS_PER_TURN)` (default 6) to stop loops; no custom cost plugin. `respond()` sums `event.usage_metadata` tokens per turn.
 - Tools return compact payloads (no full CSV rows; max 8 products per search).
-- Default to a fast model on the free tier (`gemini-3.5-flash`); model is configurable by env.
+- Default to a fast model on the free tier (`gemini-3.5-flash-lite`, chosen for the free tier daily quota); model is configurable by env.
 - `--debug` (CLI) exposes tools called, tokens and latency per turn; `adk web` shows the full event trace.

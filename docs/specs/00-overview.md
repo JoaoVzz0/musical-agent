@@ -10,7 +10,7 @@ A customer service agent for Empório da Música that answers customers by text,
 | Item | Choice |
 |---|---|
 | Agent | Google ADK (`google-adk`), single `Agent` with 5 tools, wrapped in an ADK `App` with 1 plugin |
-| Model | `gemini-3.5-flash` via Google AI Studio free tier (`GOOGLE_API_KEY`, project without billing); `MODEL` configurable |
+| Model | `gemini-3.5-flash-lite` via Google AI Studio free tier (`GOOGLE_API_KEY`, project without billing); `MODEL` configurable |
 | Guardrails | `SafetyPlugin` (ADK `BasePlugin`): local screening by default; Model Armor as an optional adapter (`MODEL_ARMOR_TEMPLATE`) |
 | Loop / cost limit | ADK native `RunConfig(max_llm_calls=MAX_LLM_CALLS_PER_TURN)`; token usage read from `event.usage_metadata` |
 | Sessions | ADK `DatabaseSessionService` on SQLite |
