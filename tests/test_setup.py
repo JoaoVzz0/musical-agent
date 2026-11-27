@@ -164,7 +164,9 @@ def test_sensitive_or_local_path_is_git_ignored(path):
 
 
 @pytest.mark.dod("01.X5")
-@pytest.mark.parametrize("path", [".env.example", "data/products.csv", "src/musical_agent/config.py"])
+@pytest.mark.parametrize(
+    "path", [".env.example", "data/products.csv", "src/musical_agent/config.py"]
+)
 def test_deliverable_path_is_not_git_ignored(path):
     assert not is_git_ignored(path)
 
