@@ -44,7 +44,12 @@ Each track writes the tests for its DoD `test` rows (`05.<track>*`) first. Eval 
 - `test_retrieval.py`: offline tests for metrics, cases and retrievers (fake embedder); the real comparison and the gate on the chosen retriever are marked `evals`. BM25 has an offline regression floor (measured baseline 79.2%) because it is the fallback when embeddings are unavailable.
 - **Outcome (measured in W2):** BM25 79.2% / MRR 0.769, embeddings 91.7% / 0.899, hybrid 83.3% / 0.792 -> rule triggered, production switched to embeddings with BM25 fallback (ADR-003, spec 03 rows 03.C2-03.C3).
 
-## DoD
+## Track E: `Dockerfile`, `compose.yaml`, `.dockerignore`, `tests/test_containers.py`
+- Goal: the reviewer copies the environment and runs it with Docker only (plus a Gemini key in `.env`), instead of installing uv and Python.
+- `Dockerfile` based on the official uv image with Python 3.12: dependencies from `uv.lock` (`uv sync --locked`), app code and `data/` copied in, runs as a non-root user; target `app` (runtime only) and target `test` (adds dev dependencies).
+- `compose.yaml` services: `web` (default, `adk web` on port 8000, bound to 0.0.0.0), `chat` (interactive CLI, `stdin_open` + `tty`, profile `cli`), `tests` (deterministic suite, profile `test`, needs no key). `.env` is optional (`required: false`) so `tests` runs without it; `./var` is a volume for sessions, logs and the embeddings cache.
+- `.dockerignore` keeps `.env`, `.venv`, `var/`, `challenge/`, caches and git metadata out of the build context (the key never enters an image layer).
+
 | ID | Criterion | Verified by |
 |---|---|---|
 | 05.A1 | `cases.yaml` is schema-valid and meets the coverage minimums per category | test |
@@ -57,6 +62,9 @@ Each track writes the tests for its DoD `test` rows (`05.<track>*`) first. Eval 
 | 05.B3 | Transcripts not edited by hand | manual: regenerate and diff |
 | 05.C1 | Workflow has lint, format, tests, gitleaks, `dod_check.py --done` and `check_comments.py` on push/PR, and `evals` only on `workflow_dispatch` | test (parses YAML) |
 | 05.C2 | CI green on GitHub | command: GitHub API `actions/runs` for the pushed head shows `conclusion: success`; run link in summary |
+| 05.E1 | `compose.yaml` defines `web` (port 8000, default), `chat` (profile `cli`, interactive) and `tests` (profile `test`); `.env` optional; `./var` mounted | test (parses YAML) |
+| 05.E2 | `Dockerfile` installs from `uv.lock` with `--locked`, has `app` and `test` targets and runs as non-root; `.dockerignore` excludes `.env`, `.venv`, `var/`, `challenge/` | test |
+| 05.E3 | `docker compose run --rm tests` is green and `docker compose up web` serves `/list-apps` | command (needs a running Docker daemon) |
 | 05.D1 | `retrieval_cases.yaml` schema-valid, 15+ cases, covers sections 2-8 | test |
 | 05.D2 | `recall_at_k`, `mrr` and `rrf_fuse` correct on toy rankings | test |
 | 05.D3 | Chosen production retriever (embeddings, decided by the rule) recall@2 >= 90% on the retrieval cases with the real API; BM25 reported as baseline and offline fallback | test (`evals` marker) |

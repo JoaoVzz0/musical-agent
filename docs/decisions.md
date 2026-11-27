@@ -45,6 +45,11 @@ Short ADRs: context, decision, consequences. Assumptions about the data and the 
 - **Decision:** due to the prototype's scope, ADK `DatabaseSessionService` on a local SQLite file (`var/sessions.db`, created automatically on first use; no server, no Docker).
 - **Consequences:** zero infrastructure for the reviewer and offline tests. SQLite allows one writer at a time and the file is local to one machine, which is fine for a single CLI user but not for several instances. A real project would use `FirestoreSessionService`, `VertexAiSessionService` (Agent Engine) or Postgres on Cloud SQL; the swap is one line because the `Runner` depends on `BaseSessionService`.
 
+## ADR-007: Docker Compose to reproduce the environment
+- **Context:** the reviewer should run the project without installing Python, uv or following several setup steps.
+- **Decision:** a `Dockerfile` (uv image, Python 3.12, dependencies from the lock file, non-root) and a `compose.yaml` with three services: `web` (`adk web`, default), `chat` (terminal) and `tests` (no key needed). The Gemini key comes from `.env` at run time and never enters an image layer.
+- **Consequences:** two commands to run (`cp .env.example .env`, `docker compose up`). The local uv workflow keeps working for development. SQLite sessions and the embeddings cache live in a `./var` volume; production would still move sessions to a managed store (ADR-006). The key is still required; a keyless mode would need a local open model, which was left out of scope.
+
 ## Assumptions about data and manual
 The challenge allows reasonable interpretations when information is ambiguous. Each one below states the inconsistency and the interpretation the agent follows.
 

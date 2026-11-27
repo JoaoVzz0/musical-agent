@@ -70,6 +70,7 @@ flowchart LR
 ### W4: Quality with the real model (1 offline lane, then API lane)
 | Lane | Tracks | Notes |
 |---|---|---|
+| L2 | 05.E containers (`Dockerfile`, `compose.yaml`, `.dockerignore`) | Added on request: reviewer runs everything with Docker. Verification (05.E3) needs a running Docker daemon. |
 | L1 | 05.B script (`scripts/generate_examples.py`) | Offline; tests 05.B1-B2 run against the generated files at the end of the wave. |
 | API (sequential) | 1. 05.D4 embeddings + hybrid comparison -> ADR-003 · 2. 05.A5 real eval run, fix loop (`fix(agent): ...`) until gates pass · 3. 05.B generate examples with the final agent · 4. 05.B tests | Examples come last so they show the agent that passed the evals. |
 - **Integration:** push, then 05.C2 (CI green through the GitHub API).

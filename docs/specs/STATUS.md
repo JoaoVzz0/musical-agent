@@ -26,4 +26,5 @@ Execution order and dependencies: `PLAN.md`. A wave starts when every track it d
 | W4 | 05.A5 Real eval run | pending | |
 | W4 | 05.B Examples generated | pending | |
 | W4 | 05.C2 CI green | pending | |
+| W4 | 05.E Containers | pending | |
 | W5 | 06 README | pending | |
