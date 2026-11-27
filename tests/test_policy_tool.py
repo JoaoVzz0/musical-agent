@@ -70,3 +70,49 @@ def test_search_policies_respects_k_within_range() -> None:
     result = search_policies("garantia", k=3)
 
     assert len(result["passages"]) == 3
+
+
+class FakeEmbeddingIndex:
+    def __init__(self, sections, error=None):
+        self._sections = sections
+        self._error = error
+
+    def search(self, question, k):
+        if self._error is not None:
+            raise self._error
+        return [
+            {"section": section, "title": f"Seção {section}", "text": "", "score": 1.0}
+            for section in self._sections[:k]
+        ]
+
+
+@pytest.mark.dod("03.C2")
+def test_search_policies_uses_embeddings_ranking_when_available(monkeypatch):
+    monkeypatch.setattr(
+        policies, "load_embedding_index", lambda: FakeEmbeddingIndex(["5.3", "5.2"])
+    )
+
+    result = policies.search_policies("cadê meu pedido? como acompanho")
+
+    assert [p["section"] for p in result["passages"]] == ["5.3", "5.2"]
+
+
+@pytest.mark.dod("03.C2")
+def test_search_policies_falls_back_to_bm25_without_api_key(monkeypatch):
+    monkeypatch.setattr(policies, "load_embedding_index", lambda: None)
+
+    result = policies.search_policies("horário de funcionamento sábado")
+
+    assert result["status"] == "ok"
+    assert result["passages"][0]["section"] == "2"
+
+
+@pytest.mark.dod("03.C2")
+def test_search_policies_falls_back_to_bm25_when_embeddings_fail(monkeypatch):
+    broken = FakeEmbeddingIndex([], error=OSError("network down"))
+    monkeypatch.setattr(policies, "load_embedding_index", lambda: broken)
+
+    result = policies.search_policies("horário de funcionamento sábado")
+
+    assert result["status"] == "ok"
+    assert result["passages"][0]["section"] == "2"
