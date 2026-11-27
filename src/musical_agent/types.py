@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import TypedDict
+from dataclasses import dataclass
+from typing import Any, TypedDict
 
 
 class ProductSummary(TypedDict):
@@ -52,3 +53,20 @@ class PolicyPassage(TypedDict):
     title: str
     text: str
     score: float
+
+
+@dataclass(frozen=True)
+class ToolCallRecord:
+    name: str
+    args: dict[str, Any]
+    response: dict[str, Any] | None
+
+
+@dataclass(frozen=True)
+class AgentReply:
+    text: str
+    tools_called: list[str]
+    tool_calls: list[ToolCallRecord]
+    tokens: int
+    latency_ms: int
+    blocked: bool
