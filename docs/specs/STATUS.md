@@ -19,8 +19,8 @@ Execution order and dependencies: `PLAN.md`. A wave starts when every track it d
 | W2 | 05.D Retrieval eval (offline) | done | 568afb2, 80f6dea, 2e8f507, a7cd82d, 4824709 |
 | W2 | 05.A Eval harness | done | 2c250c4, f7e1c56, a3fb441, 002b17d |
 | W2 | 03.X Phase 03 integration | done | c2b50ae, 450f92c |
-| W3 | 04.A Agent | pending | |
-| W3 | 04.M API checks | pending | |
+| W3 | 04.A Agent | done | 87f136a, c3b2c0b, e259e6e, fbb5665, 5868bcd, 5e87a19, f328607, c635c90, 0956baf, fd86fee, 3e20b06, fed2809, 056fe9e, a481564, c688730 |
+| W3 | 04.M API checks | done | manual evidence in wave 3 report (M1 context + resume, M2 routing, M3 adk web + plugin) |
 | W4 | 05.B Examples script | pending | |
 | W2 | 05.D4 Embeddings comparison (pulled forward from W4) | done | 1ce34b9, 7f71846, cd3f267 |
 | W4 | 05.A5 Real eval run | pending | |
