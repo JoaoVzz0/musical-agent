@@ -28,7 +28,7 @@ from musical_agent.config import PROJECT_ROOT, get_settings
 from musical_agent.types import AgentReply
 
 AGENT_NOW = "2026-03-25T10:00:00-04:00"
-DEFAULT_TURN_DELAY_S = 36.0
+DEFAULT_TURN_DELAY_S = 15.0
 DEFAULT_OUTPUT_DIR = PROJECT_ROOT / "examples"
 RETRYABLE_STATUS_CODES = frozenset({429, 503})
 RETRY_DELAYS_S = (40.0, 60.0, 90.0)

@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     )
 
     google_api_key: SecretStr | None = None
-    model: str = "gemini-3.5-flash"
+    model: str = "gemini-3.5-flash-lite"
     agent_now: datetime | None = None
     data_dir: Path = PROJECT_ROOT / "data"
     support_dir: Path = PROJECT_ROOT / "var"
