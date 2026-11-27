@@ -24,7 +24,7 @@ def test_settings_defaults_without_env_file(monkeypatch):
 
     settings = Settings(_env_file=None)
 
-    assert settings.model == "gemini-3.5-flash"
+    assert settings.model == "gemini-3.5-flash-lite"
     assert settings.max_llm_calls_per_turn == 6
     assert settings.max_message_chars == 2000
     assert settings.agent_now is None
