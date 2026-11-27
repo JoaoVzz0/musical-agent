@@ -7,6 +7,7 @@ from typing import Any, Protocol
 
 from musical_agent.config import current_time
 from musical_agent.domain.store_hours import store_status
+from musical_agent.tools.orders import FIRST_NAME_KEY
 
 INSTRUCTION_PATH = Path(__file__).with_name("instruction.md")
 INSTRUCTION_MARKER = "LIA-INSTRUCTIONS-V1"
@@ -52,8 +53,8 @@ def store_status_line(now: datetime) -> str:
 
 def known_facts(state: Mapping[str, Any]) -> list[str]:
     facts = []
-    if state.get("user:first_name"):
-        facts.append(f"The customer's first name is {state['user:first_name']}.")
+    if state.get(FIRST_NAME_KEY):
+        facts.append(f"The customer's first name is {state[FIRST_NAME_KEY]}.")
     if state.get("verified_order_id"):
         facts.append(f"Identity already verified for order {state['verified_order_id']}.")
     if state.get("last_viewed_product_id"):

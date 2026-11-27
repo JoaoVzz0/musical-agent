@@ -18,7 +18,7 @@ DELIVERED_STATUS = "delivered"
 COUNTRY_CODE = "55"
 NATIONAL_PHONE_DIGITS = range(10, 12)
 VERIFIED_ORDER_KEY = "verified_order_id"
-FIRST_NAME_KEY = "user:first_name"
+FIRST_NAME_KEY = "first_name"
 LOOKUP_ERROR_MESSAGE = "Não foi possível consultar o pedido agora."
 
 STATUS_LABELS = {
