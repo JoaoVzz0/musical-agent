@@ -6,6 +6,7 @@ import os
 from dataclasses import replace
 from pathlib import Path
 
+import httpx
 import pytest
 from google.genai.errors import ClientError, ServerError
 
@@ -533,3 +534,26 @@ async def test_paced_responder_keeps_a_minimum_interval_between_turns() -> None:
     await responder("s", "second")
 
     assert waits == [31.0]
+
+
+@pytest.mark.dod("05.A4")
+async def test_dropped_connection_is_retried_like_a_rate_limit() -> None:
+    calls = 0
+
+    async def disconnects_once(session_id: str, message: str) -> AgentReply:
+        nonlocal calls
+        calls += 1
+        if calls == 1:
+            raise httpx.RemoteProtocolError("Server disconnected without sending a response.")
+        return AgentReply("ok", [], [], 10, 100, False)
+
+    async def no_sleep(_seconds: float) -> None:
+        return None
+
+    case = replace(make_case(), expected_tools=(), must_contain=(), must_not_contain=())
+    outcome = await run_case(
+        case, disconnects_once, passing_judge(), attempts=1, retry_delays=(1.0,), sleep=no_sleep
+    )
+
+    assert outcome.status == "passed"
+    assert calls == 2
