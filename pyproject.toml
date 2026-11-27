@@ -51,6 +51,7 @@ select = ["E", "F", "W", "I", "UP", "B", "SIM", "ERA"]
 testpaths = ["tests", "evals"]
 addopts = "--strict-markers -m 'not evals'"
 asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
 markers = [
     "dod(*ids): links the test to Definition of Done rows in docs/specs",
     "evals: runs against the real model (needs GOOGLE_API_KEY)",
