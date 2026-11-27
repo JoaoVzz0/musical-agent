@@ -174,3 +174,20 @@ def test_deliverable_path_is_not_git_ignored(path):
 def test_project_root_points_to_repository():
     assert (PROJECT_ROOT / "pyproject.toml").is_file()
     assert isinstance(PROJECT_ROOT, Path)
+
+
+@pytest.mark.dod("01.X3")
+def test_agent_reply_contract_matches_respond_signature():
+    record = types.ToolCallRecord(name="search_products", args={"category": "violao"}, response={})
+    reply = types.AgentReply(
+        text="Oi!",
+        tools_called=["search_products"],
+        tool_calls=[record],
+        tokens=120,
+        latency_ms=850,
+        blocked=False,
+    )
+
+    assert reply.tool_calls[0].name == "search_products"
+    assert reply.tools_called == ["search_products"]
+    assert not reply.blocked
