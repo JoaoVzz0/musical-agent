@@ -125,7 +125,7 @@ def test_instruction_contains_key_rule(rule, monkeypatch):
 def test_instruction_tells_date_store_status_and_known_customer(monkeypatch):
     monkeypatch.setenv("AGENT_NOW", "2026-03-29T11:00:00-04:00")
     get_settings.cache_clear()
-    state = {"user:first_name": "Letícia", "verified_order_id": 7}
+    state = {"first_name": "Letícia", "verified_order_id": 7}
 
     instruction = build_instruction(SimpleNamespace(state=state))
 
@@ -209,3 +209,23 @@ async def test_session_survives_a_new_runner_on_the_same_sqlite_file(tmp_path):
         for part in content.parts or []
     )
     assert "meu nome é Ana" in history
+
+
+@pytest.mark.dod("04.A9")
+async def test_verified_name_does_not_leak_into_another_session_of_the_same_user():
+    script = [
+        call_response(
+            "get_order_status", {"order_number": 1, "email_or_phone": "pedro.oliveira@jmail.com"}
+        ),
+        text_response("Seu pedido foi entregue."),
+        text_response("Olá! Como posso ajudar?"),
+    ]
+    model, runner = scripted_runner(script)
+    await respond(
+        "first-conversation", "status do pedido 1, pedro.oliveira@jmail.com", runner=runner
+    )
+
+    await respond("second-conversation", "oi", runner=runner)
+
+    second_session_instruction = str(model.requests[-1].config.system_instruction)
+    assert "Pedro" not in second_session_instruction

@@ -191,7 +191,8 @@ def test_success_stores_verified_order_and_first_name_in_state() -> None:
 
     get_order_status(PEDRO_ORDER, PEDRO_EMAIL, context)
 
-    assert context.state == {"verified_order_id": PEDRO_ORDER, "user:first_name": "Pedro"}
+    assert context.state == {"verified_order_id": PEDRO_ORDER, "first_name": "Pedro"}
+    assert not any(key.startswith("user:") for key in context.state)
 
 
 @pytest.mark.dod("03.B7")
