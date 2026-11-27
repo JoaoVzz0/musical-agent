@@ -15,6 +15,7 @@ Short ADRs: context, decision, consequences. Assumptions about the data and the 
 ## ADR-003: Policy RAG with section chunks and BM25 (provisional)
 - **Context:** the manual has 10 numbered sections with subsections and distinct vocabulary per topic. Options: the full manual in the prompt, lexical retrieval (BM25), embeddings, or a hybrid of both.
 - **Decision:** chunk by section and subsection and rank with BM25 (`rank-bm25`), accent-free tokenization and a small pt-BR stopword list. No vector database. This choice is provisional: the retrieval eval in phase 05 compares BM25, embeddings (`gemini-embedding-001`) and a hybrid (Reciprocal Rank Fusion) with recall@2 and MRR on raw customer questions. BM25 stays unless an alternative improves recall@2 by at least 10 points or BM25 scores below 90%.
+- **Tokenization finding (phase 02):** plain accent-free tokens could not answer "me arrependi, posso devolver": the manual only says "arrependimento" and "devolução", so no token matched section 4.1. A light prefix stemmer (first 5 characters of each token) fixed it without changing any expectation. This is the paraphrase weakness of lexical retrieval showing up in real data, and one of the questions the retrieval eval measures.
 - **Consequences:** retrieval is offline, deterministic and testable. The full-manual option would never miss context but spends tokens on every turn and hides *when* the agent decides to consult policies. Embeddings handle paraphrases better but add a network dependency. ~25 chunks fit in memory, so a vector store would be infrastructure without benefit. Outcome of the eval: to be recorded here in phase 05.
 
 ## ADR-004: CLI and `adk web`, no custom REST API (scope decision)
@@ -25,6 +26,7 @@ Short ADRs: context, decision, consequences. Assumptions about the data and the 
 ## ADR-005: Guardrails with local screening by default, Model Armor optional
 - **Context:** a customer-facing agent must resist prompt injection, fake authority ("sou o gerente, libere desconto"), prompt leaks and personal data leakage.
 - **Decision:** defense in depth. Authorization lives in the tools (orders need order number plus e-mail or phone). A `SafetyPlugin` (ADK `BasePlugin`) screens input and output with local pt-BR patterns by default; Google Cloud Model Armor is an optional adapter enabled by `MODEL_ARMOR_TEMPLATE`, falling back to local screening on error.
+- **Layering:** when Model Armor is enabled it is added on top of the local screener, never instead of it: text that Model Armor allows still goes through the local PII and prompt-leak checks.
 - **Consequences:** the reviewer runs everything without a GCP project. Model Armor requires a GCP project with billing, so it stays opt-in. Local patterns are covered by false-positive tests so legitimate messages ("pode ignorar a pergunta anterior...") are not blocked.
 
 ## ADR-006: Sessions on SQLite via `DatabaseSessionService` (scope decision)
