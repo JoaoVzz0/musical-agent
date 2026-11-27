@@ -11,7 +11,7 @@ Docstrings are read by the LLM: state when to use the tool, the arguments and wh
 ## Track B: `tools/orders.py` + `tests/test_order_tools.py`
 - `get_order_status` with verification (rule 6) and after-sales windows (rules 7, 8, 10).
 - `status_label`: delivered "entregue", shipped "a caminho", confirmed "confirmado, em separação", pending "aguardando pagamento", cancelled "cancelado".
-- Return only the customer's first name. On success save `verified_order_id` and `user:first_name` in state; never store email/phone.
+- Return only the customer's first name. On success save `verified_order_id` and `first_name` in **session-scoped** state (no `user:` prefix: the CLI and `adk web` share one anonymous user id, so user-scoped keys would leak a verified name into other conversations); never store email/phone.
 - Tests: write the DoD rows `03.B*` first (TDD).
 
 ## Track C: `tools/policies.py` + `tests/test_policy_tool.py`
@@ -40,7 +40,7 @@ Docstrings are read by the LLM: state when to use the tool, the arguments and wh
 | 03.B4 | Order 7 at 2026-02-20 -> `withdrawal_eligible` True | test |
 | 03.B5 | Order 7 at 2026-03-25 -> withdrawal False, defect exchange False, legal warranty valid | test |
 | 03.B6 | Shipped order 8 -> all windows None | test |
-| 03.B7 | State stores `verified_order_id` and `user:first_name`, never email or phone | test |
+| 03.B7 | State stores `verified_order_id` and session-scoped `first_name`, never email or phone, and no `user:`-scoped key | test |
 | 03.C1 | `search_policies` returns passages with `section`, `title`, `text`, `score`; top-1 correct for 3 questions | test |
 | 03.C2 | With embeddings available, ranking comes from embeddings; without a key or when the embeddings call fails, BM25 answers (fake embedder) | test |
 | 03.C3 | Chunk embeddings are cached on disk keyed by model and chunks; a second load makes no document-embedding calls | test |

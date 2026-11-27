@@ -33,8 +33,9 @@ paths:
 
 ## Session and memory
 - Sessions persisted with ADK `DatabaseSessionService` (SQLite at `SESSION_DB_URL`), so a conversation survives restarts; `InMemorySessionService` only in tests.
-- **Save important information** in session state via `tool_context.state` (e.g., `user:first_name`, `verified_order_id`, `last_viewed_product_id`), so the agent does not ask twice and can resolve "e o outro modelo?".
+- **Save important information** in session state via `tool_context.state` (e.g., `first_name`, `verified_order_id`, `last_viewed_product_id`), so the agent does not ask twice and can resolve "e o outro modelo?".
 - Do not store unnecessary personal data (LGPD): never store full email/phone in state, only the verification result.
+- Customer facts are **session-scoped**: never use the `user:` prefix for personal data, because channels without login share one anonymous user id.
 
 ## Cost and latency
 - **Use the framework first:** cap LLM calls per turn with ADK `RunConfig(max_llm_calls=MAX_LLM_CALLS_PER_TURN)` (default 6) to stop loops; no custom cost plugin. `respond()` sums `event.usage_metadata` tokens per turn.

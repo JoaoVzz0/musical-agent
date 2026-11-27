@@ -36,6 +36,7 @@
 | 04.A5 | Message over `MAX_MESSAGE_CHARS` rejected without calling the model | test |
 | 04.A6 | LLM call limit error -> friendly reply, logged as `llm_call_limit` | test |
 | 04.A7 | With a fake `BaseLlm` that emits a function call: `tools_called`, `tokens` and `latency_ms` filled | test |
+| 04.A9 | A name verified in one session never appears in another session of the same user (scripted model, regression for a leak found in W4) | test |
 | 04.A8 | Session persists across two `Runner` instances on the same SQLite file (fake LLM) | test |
 | 04.B1 | 4 attack messages blocked with the canned reply | test |
 | 04.B2 | 6 legitimate messages pass (false-positive guard) | test |
