@@ -127,10 +127,10 @@ def test_empty_contact_fails_verification() -> None:
 
 
 @pytest.mark.dod("03.B3")
-def test_unknown_order_returns_not_found() -> None:
+def test_unknown_order_gets_the_same_answer_as_a_failed_verification() -> None:
     result = get_order_status(MISSING_ORDER, PEDRO_EMAIL)
 
-    assert result == {"status": "not_found"}
+    assert result == {"status": "verification_failed"}
 
 
 @pytest.mark.dod("03.B3")
