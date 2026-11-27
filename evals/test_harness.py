@@ -10,7 +10,7 @@ import httpx
 import pytest
 from google.genai.errors import ClientError, ServerError
 
-from evals.judge import Judge, Verdict
+from evals.judge import Judge, Verdict, default_generate
 from evals.runner import (
     CASES_PATH,
     CaseResult,
@@ -557,3 +557,20 @@ async def test_dropped_connection_is_retried_like_a_rate_limit() -> None:
 
     assert outcome.status == "passed"
     assert calls == 2
+
+
+def test_default_judge_client_times_out_instead_of_hanging(monkeypatch):
+    from google import genai
+
+    captured = {}
+
+    class FakeClient:
+        def __init__(self, **kwargs):
+            captured.update(kwargs)
+            self.models = None
+
+    monkeypatch.setattr(genai, "Client", FakeClient)
+
+    default_generate("judge-model")
+
+    assert captured["http_options"].timeout == 60_000
