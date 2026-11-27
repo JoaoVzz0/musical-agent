@@ -47,6 +47,8 @@ TURN_LIMIT_REPLY = (
     "Desculpe, não consegui concluir sua solicitação agora. "
     "Pode reformular a pergunta de um jeito mais direto?"
 )
+MODEL_TIMEOUT_MS = 60_000
+MODEL_RETRY_ATTEMPTS = 3
 TOOLS = [
     search_products,
     get_product_details,
@@ -56,6 +58,16 @@ TOOLS = [
 ]
 
 
+def model_call_config() -> genai_types.GenerateContentConfig:
+    """Bound every model call: a hung connection fails after 60 s and is retried."""
+    return genai_types.GenerateContentConfig(
+        http_options=genai_types.HttpOptions(
+            timeout=MODEL_TIMEOUT_MS,
+            retry_options=genai_types.HttpRetryOptions(attempts=MODEL_RETRY_ATTEMPTS),
+        )
+    )
+
+
 def build_agent(model: str | BaseLlm) -> Agent:
     return Agent(
         name=APP_NAME,
@@ -63,6 +75,7 @@ def build_agent(model: str | BaseLlm) -> Agent:
         description="Lia, assistente virtual da Empório da Música.",
         instruction=build_instruction,
         tools=TOOLS,
+        generate_content_config=model_call_config(),
     )
 
 
