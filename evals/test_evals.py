@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import asyncio
 from collections.abc import Iterator
 
 import pytest
@@ -8,7 +7,6 @@ import pytest
 from evals.judge import JUDGE_MODEL, Judge, default_generate
 from evals.runner import (
     CASES_PATH,
-    DEFAULT_CASE_DELAY_S,
     RATE_LIMITED,
     REPORT_PATH,
     CaseResult,
@@ -18,6 +16,7 @@ from evals.runner import (
     gate_passed,
     git_short_hash,
     load_cases,
+    paced,
     run_case,
     write_report,
 )
@@ -33,7 +32,7 @@ pytestmark = pytest.mark.evals
 def responder() -> Responder:
     from musical_agent.agent.agent import respond
 
-    return respond
+    return paced(respond)
 
 
 @pytest.fixture(scope="module")
@@ -50,9 +49,6 @@ def report() -> Iterator[None]:
 
 @pytest.mark.parametrize("case", CASES, ids=[case.id for case in CASES])
 async def test_case(case: EvalCase, responder: Responder, judge: Judge) -> None:
-    if RESULTS:
-        await asyncio.sleep(DEFAULT_CASE_DELAY_S)
-
     result = await run_case(case, responder, judge, attempts_for(case))
     RESULTS.append(result)
 
